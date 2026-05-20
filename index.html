@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Moderation System</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: white;
+            width: 400px;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 10px;
+            margin-top: 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            resize: none;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 15px;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            display: none;
+        }
+
+        .safe {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .suspicious {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .blocked {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Chat Moderation System</h1>
+
+        <textarea 
+            id="userInput" 
+            placeholder="Type your message here..."
+        ></textarea>
+
+        <button onclick="analyzeMessage()">
+            Analyze Message
+        </button>
+
+        <div id="resultBox" class="result">
+            Result
+        </div>
+    </div>
+
+    <script>
+
+        function analyzeMessage() {
+
+            let text = document.getElementById("userInput").value;
+
+            let resultBox = document.getElementById("resultBox");
+
+            // Temporary demo logic
+            // Real DFA logic will be added later
+
+            if (text.includes("http") || text.includes("www")) {
+
+                resultBox.innerText = "BLOCKED";
+                resultBox.className = "result blocked";
+
+            } 
+            else if (text.includes("!!!")) {
+
+                resultBox.innerText = "SUSPICIOUS";
+                resultBox.className = "result suspicious";
+
+            } 
+            else {
+
+                resultBox.innerText = "SAFE";
+                resultBox.className = "result safe";
+            }
+
+            resultBox.style.display = "block";
+        }
+
+    </script>
+
+</body>
+</html>
