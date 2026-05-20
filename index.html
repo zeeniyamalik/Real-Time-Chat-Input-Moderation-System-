@@ -1,138 +1,184 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Moderation System</title>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .container {
-            background: white;
-            width: 400px;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-
-        textarea {
-            width: 100%;
-            height: 120px;
-            padding: 10px;
-            margin-top: 15px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            resize: none;
-            font-size: 16px;
-        }
-
-        button {
-            width: 100%;
-            margin-top: 15px;
-            padding: 12px;
-            border: none;
-            border-radius: 5px;
-            background-color: #007bff;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        .result {
-            margin-top: 20px;
-            padding: 12px;
-            border-radius: 5px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 18px;
-            display: none;
-        }
-
-        .safe {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .suspicious {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-
-        .blocked {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DFA Chat Moderation System</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-    <div class="container">
-        <h1>Chat Moderation System</h1>
+  <div class="app-wrapper">
 
-        <textarea 
-            id="userInput" 
-            placeholder="Type your message here..."
-        ></textarea>
+    <header class="app-header">
+      <div class="header-logo">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="28" height="28" rx="7" fill="#6c63ff"/>
+          <circle cx="14" cy="14" r="5" fill="none" stroke="#fff" stroke-width="2"/>
+          <circle cx="14" cy="14" r="2" fill="#fff"/>
+          <line x1="14" y1="2" x2="14" y2="7" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="14" y1="21" x2="14" y2="26" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="2" y1="14" x2="7" y2="14" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="21" y1="14" x2="26" y2="14" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        <span class="header-title">DFA Moderation Engine</span>
+        <span class="header-badge">v1.0</span>
+      </div>
+      <div class="header-sub">Real-Time Finite Automata Chat Classifier</div>
+    </header>
 
-        <button onclick="analyzeMessage()">
-            Analyze Message
-        </button>
+    <main class="main-grid">
 
-        <div id="resultBox" class="result">
-            Result
+      <!-- LEFT: Input Panel -->
+      <section class="panel input-panel">
+        <div class="panel-header">
+          <span class="panel-icon">✍️</span>
+          <span>Message Input</span>
         </div>
-    </div>
 
-    <script>
+        <div class="chat-window" id="chat-window">
+          <div class="chat-placeholder" id="chat-placeholder">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+              <rect width="36" height="36" rx="10" fill="#1e1e2e"/>
+              <path d="M8 12h20M8 18h14M8 24h10" stroke="#6c63ff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <p>Messages you analyze will appear here</p>
+          </div>
+        </div>
 
-        function analyzeMessage() {
+        <div class="input-row">
+          <textarea
+            id="msg-input"
+            class="msg-textarea"
+            placeholder="Type a message to analyze… (e.g. 'FREE MONEY!!! click here bit.ly/xyz')"
+            rows="3"
+          ></textarea>
+        </div>
 
-            let text = document.getElementById("userInput").value;
+        <div class="btn-row">
+          <button class="btn-analyze" id="btn-analyze">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="7" cy="7" r="5" stroke="#fff" stroke-width="1.8"/>
+              <path d="M11 11L14 14" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            Analyze Message
+          </button>
+          <button class="btn-clear" id="btn-clear">Clear</button>
+        </div>
 
-            let resultBox = document.getElementById("resultBox");
+        <!-- DFA State Visualizer -->
+        <div class="dfa-visualizer" id="dfa-viz">
+          <div class="dfa-label">DFA State Machine</div>
+          <div class="dfa-states">
+            <div class="dfa-state" id="dfa-q0">
+              <div class="dfa-node" id="node-q0">q0</div>
+              <div class="dfa-node-label">START</div>
+            </div>
+            <div class="dfa-arrow">→</div>
+            <div class="dfa-state" id="dfa-q1">
+              <div class="dfa-node" id="node-q1">q1</div>
+              <div class="dfa-node-label">SCAN</div>
+            </div>
+            <div class="dfa-arrow">→</div>
+            <div class="dfa-state" id="dfa-q2">
+              <div class="dfa-node" id="node-q2">q2</div>
+              <div class="dfa-node-label">CLASSIFY</div>
+            </div>
+            <div class="dfa-arrow">→</div>
+            <div class="dfa-state" id="dfa-q3">
+              <div class="dfa-node" id="node-q3">q3</div>
+              <div class="dfa-node-label">ACCEPT</div>
+            </div>
+          </div>
+          <div class="dfa-transition-label" id="dfa-transition">Awaiting input…</div>
+        </div>
+      </section>
 
-            // Temporary demo logic
-            // Real DFA logic will be added later
+      <!-- RIGHT: Result Panel -->
+      <section class="panel result-panel">
+        <div class="panel-header">
+          <span class="panel-icon">🔎</span>
+          <span>Analysis Result</span>
+        </div>
 
-            if (text.includes("http") || text.includes("www")) {
+        <!-- Classification Badge -->
+        <div class="result-classification-wrapper" id="result-wrapper">
+          <div class="result-idle" id="result-idle">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+              <circle cx="24" cy="24" r="22" stroke="#2a2a3e" stroke-width="2"/>
+              <path d="M16 24h16M24 16v16" stroke="#3a3a5c" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <p>No message analyzed yet</p>
+          </div>
 
-                resultBox.innerText = "BLOCKED";
-                resultBox.className = "result blocked";
+          <div class="result-output hidden" id="result-output">
+            <div class="verdict-badge" id="verdict-badge">
+              <span class="verdict-icon" id="verdict-icon"></span>
+              <span class="verdict-text" id="verdict-text">SAFE</span>
+            </div>
 
-            } 
-            else if (text.includes("!!!")) {
+            <div class="score-bar-section">
+              <div class="score-header">
+                <span class="score-label">Threat Score</span>
+                <span class="score-value" id="score-value">0</span>
+              </div>
+              <div class="score-bar-track">
+                <div class="score-bar-fill" id="score-bar-fill"></div>
+                <div class="score-bar-markers">
+                  <span style="left:30%">30</span>
+                  <span style="left:70%">70</span>
+                </div>
+              </div>
+              <div class="score-zones">
+                <span class="zone safe">SAFE</span>
+                <span class="zone suspicious">SUSPICIOUS</span>
+                <span class="zone blocked">BLOCKED</span>
+              </div>
+            </div>
 
-                resultBox.innerText = "SUSPICIOUS";
-                resultBox.className = "result suspicious";
+            <!-- Detected Issues -->
+            <div class="issues-section">
+              <div class="issues-header">Detected Issues</div>
+              <ul class="issues-list" id="issues-list"></ul>
+              <div class="no-issues hidden" id="no-issues">
+                <span>✅ No issues detected — message is clean.</span>
+              </div>
+            </div>
 
-            } 
-            else {
+            <!-- Normalized View -->
+            <div class="norm-section">
+              <div class="norm-header">Normalized Input (post-DFA processing)</div>
+              <div class="norm-text" id="norm-text"></div>
+            </div>
 
-                resultBox.innerText = "SAFE";
-                resultBox.className = "result safe";
-            }
+            <!-- Module Breakdown -->
+            <div class="breakdown-section">
+              <div class="breakdown-header">Module Score Breakdown</div>
+              <div class="breakdown-grid" id="breakdown-grid"></div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-            resultBox.style.display = "block";
-        }
+    </main>
 
-    </script>
+    <!-- History Panel -->
+    <section class="history-panel">
+      <div class="panel-header">
+        <span class="panel-icon">📋</span>
+        <span>Analysis History</span>
+        <button class="btn-clear-history" id="btn-clear-history">Clear History</button>
+      </div>
+      <div class="history-list" id="history-list">
+        <div class="history-empty" id="history-empty">No history yet. Analyze a message to begin.</div>
+      </div>
+    </section>
 
+    <footer class="app-footer">
+      DFA-Based Chat Moderation System · Academic Implementation · Finite Automata Simulation
+    </footer>
+  </div>
+
+  <script src="main.js"></script>
 </body>
 </html>
