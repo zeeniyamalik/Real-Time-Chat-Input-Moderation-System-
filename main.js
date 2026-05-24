@@ -172,20 +172,18 @@ function detectOffensive(normalized, original) {
   const reasons = [];
   let score = 0;
 
-  // HARD CLEAN: remove ALL punctuation first
-  // so "hell!!" -> "hell"
-  const cleaned = normalized
-    .toLowerCase()
-    .replace(/[^a-z\s]/g, ' ')
-    .split(/\s+/)
-    .filter(Boolean);
+  for (const banned of BANNED_WORDS) {
 
-  const bannedSet = new Set(BANNED_WORDS);
+    // Create SAFE pattern:
+    // - no substring matches
+    // - no fake matches from normalization artifacts
+    const pattern = new RegExp(
+      `(^|[^a-z])${banned}([^a-z]|$)`,
+      'i'
+    );
 
-  for (const word of cleaned) {
-    // STRICT MATCH ONLY (no substring, no regex)
-    if (bannedSet.has(word)) {
-      const censored = censorWord(word);
+    if (pattern.test(original)) {
+      const censored = censorWord(banned);
 
       score += 70;
       reasons.push({
