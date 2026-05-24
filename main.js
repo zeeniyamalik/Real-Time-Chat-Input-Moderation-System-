@@ -355,6 +355,47 @@ function detectURLs(original) {
       for (const m of matches) {
         if (!found.has(m)) {
           found.add(m);
+          found.add(m);
+let urlScore = 0;
+
+for (const pattern of URL_PATTERNS) {
+  const matches = original.match(pattern);
+
+  if (matches) {
+    for (const m of matches) {
+      if (!found.has(m)) {
+        found.add(m);
+
+        const isShortener =
+          /bit\.ly|t\.me|tinyurl|goo\.gl/.test(m);
+
+        const isSuspiciousPath =
+          /login|verify|update|secure|bank|password/i.test(m);
+
+        let severity = 'low';
+        let points = 5; 
+
+        if (isShortener) {
+          points = 25;
+          severity = 'high';
+        }
+
+        if (isSuspiciousPath) {
+          points += 25;
+          severity = 'high';
+        }
+
+        urlScore += points;
+
+        reasons.push({
+          text: `URL detected: "${m.slice(0, 40)}"`,
+          severity,
+          points
+        });
+      }
+    }
+  }
+}
           score += 40;
           reasons.push({ text: `URL/Link detected: "${m.slice(0, 40)}"`, severity: 'high', points: 40 });
         }
