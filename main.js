@@ -124,43 +124,80 @@ function normalizeText(input) {
  * Banned word list (post-normalization patterns)
  * These are matched against the normalized (de-leet-ified) text.
  */
-const BANNED_WORDS = [
+/* ============================================================
+   MODULE 2 — OFFENSIVE CONTENT DETECTOR (FIXED)
+   ============================================================ */
 
-  'kill', 'murder', 'stab', 'shoot', 'bomb', 'explode', 'slaughter', 'massacre', 'assassinate',,
-  
+/**
+ * CENSOR FUNCTION (FEATURE #2)
+ * Masks middle characters based on word length
+ */
+function censorWord(word) {
+  const len = word.length;
+
+  if (len <= 2) return word;
+
+  const first = word[0];
+  const last = word[len - 1];
+
+  if (len <= 4) {
+    return first + '*'.repeat(len - 2) + last;
+  }
+
+  return first + '*'.repeat(len - 2) + last;
+}
+
+/**
+ * FIXED BANNED WORD LIST (removed syntax error)
+ */
+const BANNED_WORDS = [
+  'kill', 'murder', 'stab', 'shoot', 'bomb', 'explode',
+  'slaughter', 'massacre', 'assassinate',
+
   'hate', 'racist', 'sexist', 'faggot', 'nigger', 'retard',
-  
-  'idiot', 'moron', 'stupid', 'dumbass', 'scum', 'freak', 'psycho',
-  
-  'fuck', 'shit', 'bitch', 'bastard', 'crap', 'damn',
+
+  'idiot', 'moron', 'stupid', 'dumbass', 'scum',
+  'freak', 'psycho',
+
+  'fuck', 'shit', 'bitch', 'bastard', 'crap', 'damn', 'hell'
 ];
 
 /**
- * detectOffensive()
- * @param {string} normalized  — output of normalizeText()
- * @param {string} original    — raw input (for uppercase scan)
- * @returns {{ score: number, reasons: string[] }}
+ * OFFENSIVE DETECTOR (FIXED)
+ * - no substring matching
+ * - punctuation-safe
+ * - censorship enabled
  */
 function detectOffensive(normalized, original) {
   const reasons = [];
   let score = 0;
-  const words = normalized.split(/\s+/);
 
-  // Exact and substring match over normalized word tokens
-  for (const token of words) {
-    for (const banned of BANNED_WORDS) {
-      // DFA substring match — does token contain the banned pattern?
-      if (token.includes(banned)) {
-        score += 70;
-        reasons.push({ text: `Offensive word detected: "${banned}"`, severity: 'high', points: 70 });
-        break; // Count once per token
-      }
+  // HARD CLEAN: remove ALL punctuation first
+  // so "hell!!" -> "hell"
+  const cleaned = normalized
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean);
+
+  const bannedSet = new Set(BANNED_WORDS);
+
+  for (const word of cleaned) {
+    // STRICT MATCH ONLY (no substring, no regex)
+    if (bannedSet.has(word)) {
+      const censored = censorWord(word);
+
+      score += 70;
+      reasons.push({
+        text: `Offensive word detected: "${censored}"`,
+        severity: 'high',
+        points: 70
+      });
     }
   }
 
   return { score, reasons };
 }
-
 /* ============================================================
    MODULE 3 — SPAM DETECTOR (Multi-Feature DFA Analysis)
    ============================================================
